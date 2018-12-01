@@ -2,9 +2,12 @@ import warnings
 
 from django.conf import settings
 from django.core.cache import caches
+from django.template import Engine, engines
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.template import engines as template_engines
 from django.utils.module_loading import import_string
+
+default_engine = Engine()
 
 
 def get_backend(alias='default'):
@@ -85,6 +88,11 @@ def get_default_priority():
 
 def get_log_level():
     return get_config().get('LOG_LEVEL', 2)
+
+
+def get_template_engine():
+    alias = get_config().get('TEMPLATE_ENGINE', 'django')
+    return engines[alias]
 
 
 def get_sending_order():

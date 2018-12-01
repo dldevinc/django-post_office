@@ -5,12 +5,11 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import connection as db_connection
 from django.db.models import Q
-from django.template import Context, Template
 from django.utils.timezone import now
 
 from .connections import connections
 from .models import Email, EmailTemplate, Log, PRIORITY, STATUS
-from .settings import (get_available_backends, get_batch_size,
+from .settings import (get_available_backends, get_batch_size, get_template_engine,
                        get_log_level, get_sending_order, get_threads_per_process)
 from .utils import (get_email_template, parse_emails, parse_priority,
                     split_emails, create_attachments)
@@ -37,8 +36,6 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
         cc = []
     if bcc is None:
         bcc = []
-    if context is None:
-        context = ''
 
     # If email is to be rendered during delivery, save all necessary
     # information
@@ -60,10 +57,10 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
             message = template.content
             html_message = template.html_content
 
-        _context = Context(context or {})
-        subject = Template(subject).render(_context)
-        message = Template(message).render(_context)
-        html_message = Template(html_message).render(_context)
+        engine = get_template_engine()
+        subject = engine.from_string(subject).render(context)
+        message = engine.from_string(message).render(context)
+        html_message = engine.from_string(html_message).render(context)
 
         email = Email(
             from_email=sender,

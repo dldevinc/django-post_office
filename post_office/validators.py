@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.template import Template, TemplateSyntaxError, TemplateDoesNotExist
 from django.utils.encoding import force_str
+
+from .settings import get_template_engine
 
 
 def validate_email_with_name(value):
@@ -42,6 +43,6 @@ def validate_template_syntax(source):
     authoring.
     """
     try:
-        Template(source)
-    except (TemplateSyntaxError, TemplateDoesNotExist) as err:
+        get_template_engine().from_string(source)
+    except Exception as err:
         raise ValidationError(str(err))
