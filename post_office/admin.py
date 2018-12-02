@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django import forms
 from django.contrib import admin
 from django.conf import settings
@@ -8,6 +10,7 @@ from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import filesizeformat
 
+from .settings import get_available_backends
 from .models import Attachment, Log, Email, EmailTemplate, STATUS
 from .widgets import CommaSeparatedEmailWidget
 
@@ -81,7 +84,22 @@ class EmailAdminForm(forms.ModelForm):
             'to': CommaSeparatedEmailWidget,
             'cc': CommaSeparatedEmailWidget,
             'bcc': CommaSeparatedEmailWidget,
+            'backend_alias': forms.Select(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        backend_choices = OrderedDict()
+        for name in get_available_backends():
+            backend_choices[name] = name
+
+        backend_field = self.fields['backend_alias']
+        current_value = self.get_initial_for_field(backend_field, 'backend_alias')
+        if current_value not in backend_choices:
+            backend_choices[current_value] = current_value
+            backend_choices.move_to_end(current_value, last=False)
+        backend_field.widget.choices = list(backend_choices.items())
 
 
 @admin.register(Email)
