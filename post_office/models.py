@@ -6,6 +6,7 @@ from uuid import uuid4
 from email.mime.nonmultipart import MIMENonMultipart
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db import models
+from django.utils.formats import localize
 from django.utils.encoding import smart_str
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils import timezone
@@ -212,7 +213,7 @@ class Log(models.Model):
         verbose_name_plural = _("Logs")
 
     def __str__(self):
-        return str(self.date)
+        return localize(self.date)
 
 
 class EmailTemplateManager(models.Manager):
