@@ -8,10 +8,6 @@ class CommaSeparatedEmailField(TextField):
     default_validators = [validate_comma_separated_emails]
     description = _("Comma-separated emails")
 
-    def __init__(self, *args, **kwargs):
-        kwargs['blank'] = True
-        super().__init__(*args, **kwargs)
-
     def formfield(self, **kwargs):
         defaults = {
             'error_messages': {

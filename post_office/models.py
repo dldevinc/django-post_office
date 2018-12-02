@@ -36,8 +36,8 @@ class Email(models.Model):
     from_email = models.CharField(_("Email From"), max_length=254,
                                   validators=[validate_email_with_name])
     to = CommaSeparatedEmailField(_("Email To"))
-    cc = CommaSeparatedEmailField(_("Cc"))
-    bcc = CommaSeparatedEmailField(_("Bcc"))
+    cc = CommaSeparatedEmailField(_("Cc"), blank=True)
+    bcc = CommaSeparatedEmailField(_("Bcc"), blank=True)
     subject = models.CharField(_("Subject"), max_length=989, blank=True)
     message = models.TextField(_("Message"), blank=True)
     html_message = models.TextField(_("HTML Message"), blank=True)
