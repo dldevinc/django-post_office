@@ -13,8 +13,7 @@ from .models import Attachment, Log, Email, EmailTemplate, STATUS
 
 
 def get_message_preview(instance):
-    return ('{0}...'.format(instance.message[:25]) if len(instance.message) > 25
-            else instance.message)
+    return Truncator(instance.message).chars(25)
 
 get_message_preview.short_description = 'Message'
 
