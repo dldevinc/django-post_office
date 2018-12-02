@@ -100,8 +100,7 @@ class EmailAdmin(admin.ModelAdmin):
 
     def to_display(self, instance):
         return ', '.join(instance.to)
-
-    to_display.short_description = 'to'
+    to_display.short_description = _('to')
     to_display.admin_order_field = 'to'
 
     def get_inline_instances(self, request, obj=None):
