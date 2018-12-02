@@ -5,6 +5,9 @@ from .validators import validate_comma_separated_emails
 
 
 class CommaSeparatedEmailField(TextField):
+    default_error_messages = {
+        'invalid': _('Only comma separated emails are allowed.')
+    }
     default_validators = [validate_comma_separated_emails]
     description = _("Comma-separated emails")
 
@@ -31,7 +34,7 @@ class CommaSeparatedEmailField(TextField):
         if isinstance(value, str):
             return value
         else:
-            return ', '.join(map(lambda s: s.strip(), value))
+            return ', '.join(map(str.strip, value))
 
     def to_python(self, value):
         if isinstance(value, str):

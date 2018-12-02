@@ -3,11 +3,11 @@ from django.contrib import admin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
-from django.forms.widgets import TextInput
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 
 from .models import Attachment, Log, Email, EmailTemplate, STATUS
+from .widgets import CommaSeparatedEmailWidget
 
 
 def get_message_preview(instance):
@@ -24,22 +24,7 @@ class AttachmentInline(admin.StackedInline):
 class LogInline(admin.StackedInline):
     model = Log
     extra = 0
-
-
-class CommaSeparatedEmailWidget(TextInput):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.attrs.update({'class': 'vTextField'})
-
-    def format_value(self, value):
-        # If the value is a string wrap it in a list so it does not get sliced.
-        if not value:
-            return ''
-        if isinstance(value, str):
-            value = [value, ]
-        return ','.join([item for item in value])
-
+    
 
 def requeue(modeladmin, request, queryset):
     """An admin action to requeue emails."""
