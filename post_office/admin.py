@@ -7,7 +7,6 @@ from django.forms.widgets import TextInput
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 
-from .fields import CommaSeparatedEmailField
 from .models import Attachment, Log, Email, EmailTemplate, STATUS
 
 
@@ -50,17 +49,26 @@ def requeue(modeladmin, request, queryset):
 requeue.short_description = 'Requeue selected emails'
 
 
+class EmailAdminForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = forms.ALL_FIELDS
+        widgets = {
+            'to': CommaSeparatedEmailWidget,
+            'cc': CommaSeparatedEmailWidget,
+            'bcc': CommaSeparatedEmailWidget,
+        }
+
+
 @admin.register(Email)
 class EmailAdmin(admin.ModelAdmin):
+    form = EmailAdminForm
     list_display = ('id', 'to_display', 'subject', 'template',
                     'status', 'last_updated')
     search_fields = ['to', 'subject']
     date_hierarchy = 'last_updated'
     inlines = [AttachmentInline, LogInline]
     list_filter = ['status', 'template__language', 'template__name']
-    formfield_overrides = {
-        CommaSeparatedEmailField: {'widget': CommaSeparatedEmailWidget}
-    }
     actions = [requeue]
 
     def get_queryset(self, request):
