@@ -11,8 +11,8 @@ from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils import timezone
 from jsonfield import JSONField
 
-from post_office import cache
-from post_office.fields import CommaSeparatedEmailField
+from . import cache
+from .fields import CommaSeparatedEmailField
 
 from .connections import connections
 from .settings import context_field_class, get_log_level, get_template_engine, get_override_recipients
@@ -255,7 +255,7 @@ class EmailTemplate(models.Model):
         return '%s %s' % (self.name, self.language)
 
     def natural_key(self):
-        return (self.name, self.language, self.default_template)
+        return self.name, self.language, self.default_template
 
     def save(self, *args, **kwargs):
         # If template is a translation, use default template's name

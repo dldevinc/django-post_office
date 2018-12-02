@@ -217,7 +217,7 @@ def send_queued(processes=1, log_level=None):
         total_failed
     )
     logger.info(message)
-    return (total_sent, total_failed)
+    return total_sent, total_failed
 
 
 def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
