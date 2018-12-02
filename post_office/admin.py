@@ -10,8 +10,8 @@ from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import filesizeformat
 
-from .settings import get_available_backends
-from .models import Attachment, Log, Email, EmailTemplate, STATUS
+from .settings import get_available_backends, get_default_priority
+from .models import Attachment, Log, Email, EmailTemplate, STATUS, PRIORITY
 from .widgets import CommaSeparatedEmailWidget
 
 
@@ -104,9 +104,32 @@ class EmailAdminForm(forms.ModelForm):
 
 @admin.register(Email)
 class EmailAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+                'to', 'from_email', 'cc', 'bcc', 'headers',
+            ),
+        }),
+        (_('Content'), {
+            'fields': (
+                'subject', 'message', 'html_message', 'template', 'context'
+            ),
+        }),
+        (_('Options'), {
+            'fields': (
+                'scheduled_time', 'status', 'priority', 'backend_alias',
+            ),
+        }),
+        (_('Information'), {
+            'fields': (
+                'created', 'last_updated',
+            ),
+        }),
+    )
+
     form = EmailAdminForm
-    list_display = ('id', 'to_display', 'subject', 'template',
-                    'status', 'last_updated')
+    list_display = ('to_display', 'subject', 'template', 'status', 'last_updated')
+    readonly_fields = ['created', 'last_updated']
     search_fields = ['to', 'subject']
     date_hierarchy = 'last_updated'
     inlines = [AttachmentInline, LogInline]
@@ -133,6 +156,14 @@ class EmailAdmin(admin.ModelAdmin):
                     continue
             inline_instances.append(inline)
         return inline_instances
+
+    def get_changeform_initial_data(self, request):
+        initial_data = super().get_changeform_initial_data(request)
+        initial_data.setdefault('from_email', settings.DEFAULT_FROM_EMAIL)
+        initial_data.setdefault('status', STATUS.queued)
+        initial_data.setdefault('priority', getattr(PRIORITY, get_default_priority(), 'meduim'))
+        initial_data.setdefault('backend_alias', 'default')
+        return initial_data
 
     def requeue(self, request, queryset):
         """An admin action to requeue emails."""
