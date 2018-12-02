@@ -73,14 +73,6 @@ class LogInline(admin.TabularInline):
     message_display.short_description = _('Message')
 
 
-def requeue(modeladmin, request, queryset):
-    """An admin action to requeue emails."""
-    queryset.update(status=STATUS.queued)
-
-
-requeue.short_description = 'Requeue selected emails'
-
-
 class EmailAdminForm(forms.ModelForm):
     class Meta:
         model = Email
@@ -101,7 +93,7 @@ class EmailAdmin(admin.ModelAdmin):
     date_hierarchy = 'last_updated'
     inlines = [AttachmentInline, LogInline]
     list_filter = ['status', 'template__language', 'template__name']
-    actions = [requeue]
+    actions = ['requeue']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('template')
@@ -124,6 +116,11 @@ class EmailAdmin(admin.ModelAdmin):
                     continue
             inline_instances.append(inline)
         return inline_instances
+
+    def requeue(self, request, queryset):
+        """An admin action to requeue emails."""
+        queryset.update(status=STATUS.queued)
+    requeue.short_description = _('Requeue selected emails')
 
 
 @admin.register(Log)
