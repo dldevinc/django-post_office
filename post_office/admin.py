@@ -1,5 +1,4 @@
 from django import forms
-from django.db import models
 from django.contrib import admin
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -79,12 +78,6 @@ class LogAdmin(admin.ModelAdmin):
     list_display = ('date', 'email', 'status', get_message_preview)
 
 
-class SubjectField(TextInput):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.attrs.update({'style': 'width: 610px;'})
-
-
 class EmailTemplateAdminFormSet(BaseInlineFormSet):
     def clean(self):
         """
@@ -128,9 +121,6 @@ class EmailTemplateInline(admin.StackedInline):
     model = EmailTemplate
     extra = 0
     fields = ('language', 'subject', 'content', 'html_content',)
-    formfield_overrides = {
-        models.CharField: {'widget': SubjectField}
-    }
 
     def get_max_num(self, request, obj=None, **kwargs):
         return len(settings.LANGUAGES)
@@ -150,9 +140,6 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         }),
     ]
     inlines = (EmailTemplateInline,) if settings.USE_I18N else ()
-    formfield_overrides = {
-        models.CharField: {'widget': SubjectField}
-    }
 
     def get_queryset(self, request):
         return self.model.objects.filter(default_template__isnull=True)
