@@ -128,21 +128,16 @@ class EmailAdmin(admin.ModelAdmin):
     )
 
     form = EmailAdminForm
-    list_display = ('to_display', 'subject', 'template', 'status', 'last_updated')
+    inlines = [AttachmentInline, LogInline]
+    list_display = ('__str__', 'subject', 'template', 'status', 'last_updated')
     readonly_fields = ['created', 'last_updated']
     search_fields = ['to', 'subject']
     date_hierarchy = 'last_updated'
-    inlines = [AttachmentInline, LogInline]
     list_filter = ['status', 'template__language', 'template__name']
     actions = ['requeue']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('template')
-
-    def to_display(self, instance):
-        return ', '.join(instance.to)
-    to_display.short_description = _('to')
-    to_display.admin_order_field = 'to'
 
     def get_inline_instances(self, request, obj=None):
         """ Do not show empty readonly inlines """

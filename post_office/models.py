@@ -76,7 +76,9 @@ class Email(models.Model):
         self._cached_email_message = None
 
     def __str__(self):
-        return '%s' % self.to
+        if isinstance(self.to, list):
+            return ', '.join(self.to)
+        return str(self.to)
 
     def email_message(self):
         """

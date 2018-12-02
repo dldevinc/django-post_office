@@ -302,7 +302,7 @@ class ModelTest(TestCase):
         self.assertEqual(repr(EmailTemplate(name='test', language='en')),
                          '<EmailTemplate: test en>')
         self.assertEqual(repr(Email(to=['test@example.com'])),
-                         "<Email: ['test@example.com']>")
+                         "<Email: test@example.com>")
 
     def test_natural_key(self):
         template = EmailTemplate.objects.create(name='name')
