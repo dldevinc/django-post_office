@@ -21,10 +21,26 @@ class AttachmentInline(admin.StackedInline):
     extra = 0
 
 
-class LogInline(admin.StackedInline):
+class LogInline(admin.TabularInline):
     model = Log
     extra = 0
-    
+    ordering = ['date']
+    fields = ['date', 'status', 'exception_type', 'message_display']
+    readonly_fields = ['date', 'status', 'exception_type', 'message_display']
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def message_display(self, instance):
+        return Truncator(instance.message).chars(64)
+    message_display.short_description = _('Message')
+
 
 def requeue(modeladmin, request, queryset):
     """An admin action to requeue emails."""
