@@ -206,8 +206,7 @@ class EmailTemplateAdminForm(forms.ModelForm):
 
     class Meta:
         model = EmailTemplate
-        fields = ['name', 'description', 'subject', 'content', 'html_content', 'language',
-                  'default_template']
+        fields = forms.ALL_FIELDS
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')
@@ -221,7 +220,7 @@ class EmailTemplateInline(admin.StackedInline):
     formset = EmailTemplateAdminFormSet
     model = EmailTemplate
     extra = 0
-    fields = ('language', 'subject', 'content', 'html_content',)
+    fields = ['language', 'subject', 'content', 'html_content']
 
     def get_max_num(self, request, obj=None, **kwargs):
         return len(settings.LANGUAGES)
@@ -234,12 +233,22 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'subject')
     fieldsets = [
         (None, {
-            'fields': ('name', 'description'),
+            'fields': (
+                'name', 'description'
+            ),
         }),
-        (_("Default Content"), {
-            'fields': ('subject', 'content', 'html_content'),
+        (_('Content'), {
+            'fields': (
+                'subject', 'content', 'html_content'
+            ),
+        }),
+        (_('Information'), {
+            'fields': (
+                'created', 'last_updated',
+            ),
         }),
     ]
+    readonly_fields = ['created', 'last_updated']
     inlines = (EmailTemplateInline,) if settings.USE_I18N else ()
 
     def get_queryset(self, request):
