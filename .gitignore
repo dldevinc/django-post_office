@@ -26,6 +26,7 @@ pip-delete-this-directory.txt
 ghostdriver.log
 
 # Editor configs
+.idea
 .project
 .pydevproject
 .python-version
@@ -37,4 +38,5 @@ ghostdriver.log
 *.lock
 .mypy_cache
 
+.venv
 post_office_attachments
