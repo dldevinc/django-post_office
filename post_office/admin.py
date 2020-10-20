@@ -1,10 +1,12 @@
 from django import forms
 from django.contrib import admin
 from django.conf import settings
+from django.utils.html import format_html
 from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
+from django.template.defaultfilters import filesizeformat
 
 from .models import Attachment, Log, Email, EmailTemplate, STATUS
 from .widgets import CommaSeparatedEmailWidget
@@ -16,9 +18,38 @@ def get_message_preview(instance):
 get_message_preview.short_description = 'Message'
 
 
-class AttachmentInline(admin.StackedInline):
+class AttachmentInline(admin.TabularInline):
     model = Attachment.emails.through
     extra = 0
+    ordering = ['attachment__name']
+    fields = ['attachment_file', 'attachment_filesize']
+    readonly_fields = ['attachment_file', 'attachment_filesize']
+    verbose_name_plural = _('Attachments')
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def attachment_file(self, instance):
+        attachment = instance.attachment
+        return format_html(
+            '<a href="{url}">{name}</a>',
+            url=attachment.file.url,
+            name=attachment.name
+        )
+
+    attachment_file.short_description = _('Name')
+    attachment_file.allow_tags = True
+
+    def attachment_filesize(self, instance):
+        return filesizeformat(instance.attachment.file.size)
+
+    attachment_filesize.short_description = _('Size')
 
 
 class LogInline(admin.TabularInline):
@@ -80,6 +111,19 @@ class EmailAdmin(admin.ModelAdmin):
 
     to_display.short_description = 'to'
     to_display.admin_order_field = 'to'
+
+    def get_inline_instances(self, request, obj=None):
+        """ Do not show empty readonly inlines """
+        inline_instances = []
+        for inline in super().get_inline_instances(request, obj):
+            if isinstance(inline, AttachmentInline):
+                if obj is None or not obj.attachments.exists():
+                    continue
+            if isinstance(inline, LogInline):
+                if obj is None or not obj.logs.exists():
+                    continue
+            inline_instances.append(inline)
+        return inline_instances
 
 
 @admin.register(Log)
